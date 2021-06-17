@@ -310,12 +310,9 @@ MakeCiteHyperlink <- function(result, papers, hyperlink, keys, auth,
   )
   if (style == "html") {
     new.links <- if (any(first)) {
-      paste(paste("<a id='cite-", gsub("[^_a-zA-Z0-9-]",
-        "", keys[first],
-        useBytes = TRUE
-      ),
-      "'></a>",
-      sep = ""
+      paste(paste("<a id='cite-",
+        "'></a>",
+        sep = ""
       ), collapse = "")
     } else {
       ""
