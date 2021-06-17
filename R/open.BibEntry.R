@@ -26,64 +26,72 @@
 #' @examples
 #' \dontrun{
 #' if (requireNamespace("bibtex")) {
-#'     testbib <- ReadBib(system.file("REFERENCES.bib", package="bibtex"))
-#'     open(testbib)
-#'     testbib$file <- file.path(R.home("doc/manual"), "R-intro.pdf")
-#'     open(testbib)
+#'   testbib <- ReadBib(system.file("REFERENCES.bib", package = "bibtex"))
+#'   open(testbib)
+#'   testbib$file <- file.path(R.home("doc/manual"), "R-intro.pdf")
+#'   open(testbib)
 #' }
 #' }
 open.BibEntry <- function(con, entry = 1L,
                           open.field = c("file", "url", "eprint", "doi"),
-                          viewer, ...){
+                          viewer, ...) {
   ref <- con[entry]
   stopifnot(length(ref) == 1L)
-  if (missing(viewer))
+  if (missing(viewer)) {
     viewer <- getOption("browser")
+  }
   url <- GetURL(ref, open.field)
-  if (grepl("^file", url, useBytes = TRUE))
+  if (grepl("^file", url, useBytes = TRUE)) {
     viewer <- getOption("pdfviewer")
+  }
 
-  if (!nzchar(url))
-    message('Could not open the specified entry.')
-  else browseURL(url, viewer)
+  if (!nzchar(url)) {
+    message("Could not open the specified entry.")
+  } else {
+    browseURL(url, viewer)
+  }
   invisible()
 }
 
 #' @keywords internal
 #' @noRd
-GetURL <- function(entry, flds, to.bib = FALSE){
+GetURL <- function(entry, flds, to.bib = FALSE) {
   url <- ""
   opened <- FALSE
   i <- 1L
   entry <- unclass(entry)[[1L]]
-  while (!opened && i <= length(flds)){
-    if (flds[i] == "file" && !is.null(entry[["file"]])){
-      url <- paste0('file://', entry[['file']])
+  while (!opened && i <= length(flds)) {
+    if (flds[i] == "file" && !is.null(entry[["file"]])) {
+      url <- paste0("file://", entry[["file"]])
       opened <- TRUE
-  }else if (flds[i] == "eprint" && !is.null(entry[["eprint"]])){
+    } else if (flds[i] == "eprint" && !is.null(entry[["eprint"]])) {
       eprinttype <- suppressMessages(tolower(entry[["eprinttype"]]))
-      if (length(eprinttype)){
-        base.url <- switch(eprinttype, jstor = "https://www.jstor.org/stable/",
-                           arxiv = "https://arxiv.org/abs/",
-                           pubmed = paste0("https://eutils.ncbi.nlm.nih.gov/",
-                                         "entrez/eutils/elink.fcgi?dbfrom=",
-                                         "pubmed&cmd=prlinks&retmode=ref&id="))
-        if (!is.null(base.url)){
+      if (length(eprinttype)) {
+        base.url <- switch(eprinttype,
+          jstor = "https://www.jstor.org/stable/",
+          arxiv = "https://arxiv.org/abs/",
+          pubmed = paste0(
+            "https://eutils.ncbi.nlm.nih.gov/",
+            "entrez/eutils/elink.fcgi?dbfrom=",
+            "pubmed&cmd=prlinks&retmode=ref&id="
+          )
+        )
+        if (!is.null(base.url)) {
           url <- paste0(base.url, entry[["eprint"]])
           opened <- TRUE
         }
       }
-    }else if (flds[i] == "doi" && !is.null(entry[["doi"]])){
+    } else if (flds[i] == "doi" && !is.null(entry[["doi"]])) {
       url <- paste0("https://doi.org/", entry[["doi"]])
       opened <- TRUE
-    }else if (flds[i] == "url" && !is.null(entry[["url"]])){
+    } else if (flds[i] == "url" && !is.null(entry[["url"]])) {
       url <- entry[["url"]]
       opened <- TRUE
     }
     i <- i + 1L
   }
-  if (!opened && to.bib)
-      url <- paste0("#bib-", gsub("[^_a-zA-Z0-9-]", "", attr(entry, "key"),
-                                  useBytes = TRUE))
+  if (!opened && to.bib) {
+    url <- "#bib"
+  }
   url
 }
